@@ -1,19 +1,24 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { addToWaitlist } from "../actions/saveEmail/route";
+import { addToWaitlist } from "@/app/actions/addToWaitlist";
 
 export default function Waitlist() {
-  const [formData, setFormData] = useState({ name: "", email: "" });
-  const [message, setMessage] = useState("");
+  const [formData, setFormData] = useState<{ name: string; email: string }>({
+    name: "",
+    email: "",
+  });
+  const [message, setMessage] = useState<string>("");
   const [isPending, startTransition] = useTransition();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Define a type-safe change handler
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Define the submit handler with proper error typing
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
 
     if (!formData.name || !formData.email) {
@@ -21,14 +26,15 @@ export default function Waitlist() {
       return;
     }
 
-    startTransition(async () => {
-      try {
-        const result = await addToWaitlist(formData); // Call the server action
-        setMessage(result);
-        setFormData({ name: "", email: "" });
-      } catch (error: any) {
-        setMessage(error.message || "An unexpected error occurred.");
-      }
+    startTransition(() => {
+      addToWaitlist(formData)
+        .then((result: string) => {
+          setMessage(result);
+          setFormData({ name: "", email: "" });
+        })
+        .catch((error: Error) => {
+          setMessage(error.message || "An unexpected error occurred.");
+        });
     });
   };
 
