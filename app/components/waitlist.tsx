@@ -1,9 +1,12 @@
 "use client";
-import { useState } from "react";
+
+import { useState, useTransition } from "react";
+import { addToWaitlist } from "../actions/saveEmail/route";
 
 export default function Waitlist() {
   const [formData, setFormData] = useState({ name: "", email: "" });
   const [message, setMessage] = useState("");
+  const [isPending, startTransition] = useTransition();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -18,26 +21,15 @@ export default function Waitlist() {
       return;
     }
 
-    try {
-      const res = await fetch("/api/waitlist", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (res.ok) {
-        setMessage("Thank you for joining our waitlist!");
+    startTransition(async () => {
+      try {
+        const result = await addToWaitlist(formData); // Call the server action
+        setMessage(result);
         setFormData({ name: "", email: "" });
-      } else {
-        const errorData = await res.json();
-        setMessage(errorData.message || "Failed to join the waitlist.");
+      } catch (error: any) {
+        setMessage(error.message || "An unexpected error occurred.");
       }
-    } catch (error) {
-      console.error(error);
-      setMessage("An unexpected error occurred.");
-    }
+    });
   };
 
   return (
@@ -63,9 +55,12 @@ export default function Waitlist() {
       />
       <button
         type="submit"
-        className="px-6 py-3 rounded bg-blue-600 text-white hover:bg-blue-700"
+        disabled={isPending}
+        className={`px-6 py-3 rounded ${
+          isPending ? "bg-gray-500" : "bg-blue-600"
+        } text-white hover:bg-blue-700`}
       >
-        Join Waitlist
+        {isPending ? "Submitting..." : "Join Waitlist"}
       </button>
       {message && <p className="text-sm mt-2">{message}</p>}
     </form>

@@ -1,45 +1,37 @@
-import { NextResponse } from "next/server";
-import AWS from "aws-sdk";
+"use server";
 import connectDB from "@/lib/mongodb";
-import User, { IUser } from "@/models/user";
+import User, { IUser } from "@/models/User";
+import AWS from "aws-sdk";
 
-const region = process.env.AWS_REGION || "";
-const accessKeyId = process.env.AWS_ACCESS_KEY_ID || "";
-const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY || "";
-const sourceEmail = process.env.SES_SOURCE_EMAIL || ""; // Your verified SES email address
-
-if (!region || !accessKeyId || !secretAccessKey || !sourceEmail) {
-  throw new Error(
-    "Missing AWS SES configuration in environment variables. Please check AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and SES_SOURCE_EMAIL."
-  );
-}
-
-// Configure AWS SES
+// AWS SES Configuration
 const ses = new AWS.SES({
-  region,
-  accessKeyId,
-  secretAccessKey,
+  region: process.env.AWS_REGION,
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
 });
 
-export async function POST(req: Request) {
+interface WaitlistInput {
+  name: string;
+  email: string;
+}
+
+export async function addToWaitlist({ name, email }: WaitlistInput) {
+  if (!name || !email) {
+    throw new Error("Name and email are required.");
+  }
+
+  if (!process.env.SES_SOURCE_EMAIL) {
+    throw new Error("SES_SOURCE_EMAIL is not defined in environment variables.");
+  }
+
   try {
     await connectDB();
 
-    const { name, email }: { name: string; email: string } = await req.json();
-
-    // Validate input
-    if (!name || !email) {
-      return NextResponse.json(
-        { message: "Name and email are required." },
-        { status: 400 }
-      );
-    }
-
-    // Save to MongoDB
+    // Save user to MongoDB
     const newUser: IUser = new User({ name, email });
     await newUser.save();
 
-    // Send acknowledgment email
+    // Send acknowledgment email via AWS SES
     const params = {
       Destination: {
         ToAddresses: [email],
@@ -56,20 +48,14 @@ export async function POST(req: Request) {
           Data: "Waitlist Confirmation",
         },
       },
-      Source: sourceEmail,
+      Source: process.env.SES_SOURCE_EMAIL, // Verified email address
     };
 
     await ses.sendEmail(params).promise();
 
-    return NextResponse.json(
-      { message: "Successfully added to the waitlist and email sent." },
-      { status: 201 }
-    );
+    return "Successfully added to waitlist!";
   } catch (error) {
-    console.error("Error:", error);
-    return NextResponse.json(
-      { message: "Failed to process your request." },
-      { status: 500 }
-    );
+    console.error("Error in addToWaitlist:", error);
+    throw new Error("Failed to add to the waitlist.");
   }
 }
