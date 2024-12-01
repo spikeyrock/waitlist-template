@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { addToWaitlist } from "@/app/actions/addToWaitlist";
+import { addToWaitlist } from "../actions/addToWaitlist";
 
 export default function Waitlist() {
   const [formData, setFormData] = useState<{ name: string; email: string }>({
