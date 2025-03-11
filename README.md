@@ -1,45 +1,138 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Waitlist Signup Template
 
-## Getting Started
+## Overview
+This is an open-source waitlist signup template built using Next.js 14 with the App Router. It includes a simple landing page with a waitlist form that collects user details (name and email) and stores them in a MongoDB database. Additionally, it sends a confirmation email to users via AWS SES upon successful signup.
 
-First, run the development server:
+## Features
+- **Next.js 14 with App Router** for modern React development.
+- **Server Actions** for seamless form submission.
+- **MongoDB Integration** to store waitlist signups.
+- **AWS SES Integration** for email notifications.
+- **Tailwind CSS** for a clean and responsive UI.
+- **Dark Mode Support** using Next.js built-in features.
 
+## Technologies Used
+- **Next.js 14**
+- **React**
+- **TypeScript**
+- **Tailwind CSS**
+- **MongoDB**
+- **Mongoose**
+- **AWS SES (Simple Email Service)**
+
+## Installation
+### Prerequisites
+- Node.js (>=16.x)
+- MongoDB instance (local or cloud-based like MongoDB Atlas)
+- AWS account with SES configured
+
+### Clone the Repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+$ git clone https://github.com/spikeyrock/waitlist-template.git
+$ cd waitlist-template
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Install Dependencies
+```bash
+$ npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment Variables
+Create a `.env.local` file in the root directory and add the following:
+```env
+MONGODB_URI=your_mongodb_connection_string
+AWS_REGION=your_aws_region
+AWS_ACCESS_KEY_ID=your_aws_access_key
+AWS_SECRET_ACCESS_KEY=your_aws_secret_key
+SES_SOURCE_EMAIL=your_verified_ses_email
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Running the Application
+```bash
+$ npm run dev
+```
+The application will be available at `http://localhost:3000`
 
-## Learn More
+## File Structure
+```
+waitlist-template/
+│── components/
+│   ├── Waitlist.tsx   # Waitlist signup form
+│── pages/
+│   ├── index.tsx      # Home page
+│── lib/
+│   ├── mongodb.ts     # Database connection
+│── models/
+│   ├── User.ts        # Mongoose user model
+│── actions/
+│   ├── addToWaitlist.ts  # Server action for handling form submission
+│── styles/
+│   ├── globals.css    # Global styles
+│── public/fonts/      # Custom fonts (Geist Sans & Geist Mono)
+│── .env.local.example # Example environment variables
+│── README.md          # Project documentation
+│── next.config.js     # Next.js configuration
+│── package.json       # Dependencies and scripts
+│── tsconfig.json      # TypeScript configuration
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Usage
+### Submitting the Waitlist Form
+Users enter their name and email, which gets saved to the database and triggers an email confirmation via AWS SES.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### MongoDB Schema
+The User model is defined as:
+```ts
+import mongoose, { Schema, Document } from "mongoose";
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+export interface IUser extends Document {
+  name: string;
+  email: string;
+  createdAt: Date;
+}
 
-## Deploy on Vercel
+const UserSchema: Schema<IUser> = new Schema(
+  {
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+  },
+  { timestamps: true }
+);
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+const User = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
+export default User;
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deployment
+### Deploy to Vercel
+```bash
+$ vercel
+```
 
+### Deploy to AWS EC2
+1. Build the application:
+```bash
+$ npm run build
+```
+2. Start the server:
+```bash
+$ npm start
+```
 
-env variables
+## Contributing
+Contributions are welcome! To contribute:
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature-branch`)
+3. Commit your changes (`git commit -m 'Add new feature'`)
+4. Push to your branch (`git push origin feature-branch`)
+5. Open a pull request
 
-MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/<dbname>?retryWrites=true&w=majority
-AWS_REGION=ap-south-1
-AWS_ACCESS_KEY_ID=<your-access-key-id>
-AWS_SECRET_ACCESS_KEY=<your-secret-access-key>
-SES_SOURCE_EMAIL=your-verified-email@example.com
+## License
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+
+## Contact
+For questions or issues, please open an issue on GitHub or contact `your@email.com`.
+
+---
+Made with ❤️ by Ritwik (https://github.com/spikeyrock)
+
