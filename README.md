@@ -53,29 +53,6 @@ $ npm run dev
 ```
 The application will be available at `http://localhost:3000`
 
-## File Structure
-```
-waitlist-template/
-│── components/
-│   ├── Waitlist.tsx   # Waitlist signup form
-│── pages/
-│   ├── index.tsx      # Home page
-│── lib/
-│   ├── mongodb.ts     # Database connection
-│── models/
-│   ├── User.ts        # Mongoose user model
-│── actions/
-│   ├── addToWaitlist.ts  # Server action for handling form submission
-│── styles/
-│   ├── globals.css    # Global styles
-│── public/fonts/      # Custom fonts (Geist Sans & Geist Mono)
-│── .env.local.example # Example environment variables
-│── README.md          # Project documentation
-│── next.config.js     # Next.js configuration
-│── package.json       # Dependencies and scripts
-│── tsconfig.json      # TypeScript configuration
-```
-
 ## Usage
 ### Submitting the Waitlist Form
 Users enter their name and email, which gets saved to the database and triggers an email confirmation via AWS SES.
@@ -103,35 +80,8 @@ const User = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
 export default User;
 ```
 
-## Deployment
-### Deploy to Vercel
-```bash
-$ vercel
-```
-
-### Deploy to AWS EC2
-1. Build the application:
-```bash
-$ npm run build
-```
-2. Start the server:
-```bash
-$ npm start
-```
-
-## Contributing
-Contributions are welcome! To contribute:
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature-branch`)
-3. Commit your changes (`git commit -m 'Add new feature'`)
-4. Push to your branch (`git push origin feature-branch`)
-5. Open a pull request
-
 ## License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
-
-## Contact
-For questions or issues, please open an issue on GitHub or contact `your@email.com`.
 
 ---
 Made with ❤️ by Ritwik (https://github.com/spikeyrock)
